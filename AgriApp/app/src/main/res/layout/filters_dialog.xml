@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5sp"
+    android:background="#9000695c"
+    >
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="32sp"
+        android:layout_marginTop="36sp"
+        android:gravity="center_horizontal"
+        android:text="Filter/Sort Options"
+        android:textColor="#fff"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/state_list"
+        android:layout_width="200sp"
+        android:layout_height="45sp"
+        android:layout_marginTop="44sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/district_list"
+        android:layout_width="200sp"
+        android:layout_height="45sp"
+        android:layout_marginTop="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/state_list" />
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/village_list"
+        android:layout_width="200sp"
+        android:layout_height="45sp"
+        android:layout_marginTop="8sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/district_list" />
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/sorting_param"
+        android:layout_width="200sp"
+        android:layout_height="45sp"
+        android:layout_marginTop="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/village_list"
+        android:layout_marginBottom="10sp"
+        />
+
+    <EditText
+        android:id="@+id/commodityName"
+        android:layout_width="200sp"
+        android:layout_height="45sp"
+        android:layout_marginTop="12sp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Commodity"
+        android:textColor="#fff"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sorting_param" />
+
+    <EditText
+        android:id="@+id/limitNumber"
+        android:layout_width="200sp"
+        android:layout_height="45sp"
+        android:layout_marginTop="12sp"
+        android:ems="10"
+        android:text="Limit"
+        android:textColor="#fff"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/commodityName" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
