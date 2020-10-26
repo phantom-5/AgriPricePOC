@@ -29,22 +29,17 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements FilterDialog.FilterDialogListener {
     static TextView tv;
+    static Button b,dialog;
     static final String APIKEY="579b464db66ec23bdd0000019f6763ff8f8f48b46ac271169e884dd7";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-        Button b=findViewById(R.id.button);
+        b=findViewById(R.id.button);
         tv=findViewById(R.id.textView);
-        Button dialog=findViewById(R.id.button2);
-        NetworkInfo info = (NetworkInfo) ((ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        if(info==null){
-            Toast.makeText(this,"No Internet Connection.",Toast.LENGTH_LONG).show();
-            b.setEnabled(false);
-            dialog.setEnabled(false);
-            tv.setText("Connect to Internet and Restart App");
-        }
+        dialog=findViewById(R.id.button2);
+
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,85 +76,99 @@ public class MainActivity extends AppCompatActivity implements FilterDialog.Filt
         showResults(sURL);
     }
     public void showResults(String sURL) {
-        Thread thread=new Thread(new Runnable(){
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(sURL);
-                    URLConnection request = url.openConnection();
-                    request.connect();
+        if(checkInternet(MainActivity.this)) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        URL url = new URL(sURL);
+                        URLConnection request = url.openConnection();
+                        request.connect();
 
-                    JsonParser jp = new JsonParser();
-                    JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
-                    JsonObject rootobj = root.getAsJsonObject();
-                    JsonArray records = rootobj.get("records").getAsJsonArray();
-                    if(records.size()==0){
+                        JsonParser jp = new JsonParser();
+                        JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
+                        JsonObject rootobj = root.getAsJsonObject();
+                        JsonArray records = rootobj.get("records").getAsJsonArray();
+                        if (records.size() == 0) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tv.setText(Html.fromHtml("<strong><font color='red'>No Results Found for Query At This Moment</font></strong>"));
+                                }
+                            });
+                            return;
+
+                        }
+                        Commodity commodity[] = new Commodity[records.size()];
+                        for (int i = 0; i < records.size(); i++) {
+                            JsonObject jsonObject = records.get(i).getAsJsonObject();
+                            //Log.d("Ricky",jsonObject.toString());
+                            commodity[i] = new Commodity(
+                                    jsonObject.get("timestamp").getAsString(),
+                                    jsonObject.get("state").getAsString(),
+                                    jsonObject.get("district").getAsString(),
+                                    jsonObject.get("market").getAsString(),
+                                    jsonObject.get("commodity").getAsString(),
+                                    jsonObject.get("variety").getAsString(),
+                                    jsonObject.get("arrival_date").getAsString(),
+                                    Double.parseDouble(jsonObject.get("min_price").getAsString()),
+                                    Double.parseDouble(jsonObject.get("max_price").getAsString()),
+                                    Double.parseDouble(jsonObject.get("modal_price").getAsString())
+                            );
+                        }
+                        if (!FiltersData.sortParam.equals("None")) {
+                            Arrays.sort(commodity);
+                        }
+                        String fullTextDisplay = "";
+                        for (Commodity c : commodity) {
+                            fullTextDisplay += " <div >" +
+                                    "  <strong><font color='grey'>State: " + c.state + "</font><font color='navy'> District: " + c.district + "</font><font color='red'> Variety: " + c.variety + "</font></strong><br/>" +
+                                    "  <font color='purple'> Market: " + c.market + "</font><strong><font color='black' size='4sp'> Commodity: " + c.commodity + "</font></strong><br/>" +
+                                    "  <font color='blue'> MinPrice: &#x20B9; " + Double.toString(c.min_price) + " </font><font color='blue'> MaxPrice: &#x20B9; " + Double.toString(c.max_price) + "</font>" +
+                                    "  <font color='blue'> Modal: &#x20B9; " + Double.toString(c.modal_price) + "</font>" +
+                                    "  <br/>" + "<font color='grey'>Arrival Date: " + c.arrival_date + "</font><br/>" +
+                                    "  <span>...</span>" +
+                                    "  </div>";
+                        }
+                        String tempDisplay = fullTextDisplay + "<div>End of results.</div>";
+                        final String displayText = tempDisplay;
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tv.setText(Html.fromHtml("<strong><font color='red'>No Results Found for Query At This Moment</font></strong>"));
+                                //String check[]=displayText.split("<div>");
+                                //Log.d("Ricky",check[check.length-1]);
+                                tv.setText(Html.fromHtml(displayText));
                             }
                         });
-                        return;
 
+                        //Log.d("Ricky",Integer.toString(records.size()));
+
+
+                    } catch (Exception e) {
+                        // Log.d("Ricky",e.toString());
                     }
-                    Commodity commodity[]=new Commodity[records.size()];
-                    for(int i=0;i<records.size();i++){
-                        JsonObject jsonObject= records.get(i).getAsJsonObject();
-                        //Log.d("Ricky",jsonObject.toString());
-                        commodity[i]=new Commodity(
-                                jsonObject.get("timestamp").getAsString(),
-                                jsonObject.get("state").getAsString(),
-                                jsonObject.get("district").getAsString(),
-                                jsonObject.get("market").getAsString(),
-                                jsonObject.get("commodity").getAsString(),
-                                jsonObject.get("variety").getAsString(),
-                                jsonObject.get("arrival_date").getAsString(),
-                                Double.parseDouble(jsonObject.get("min_price").getAsString()),
-                                Double.parseDouble(jsonObject.get("max_price").getAsString()),
-                                Double.parseDouble(jsonObject.get("modal_price").getAsString())
-                        );
-                    }
-                    if(!FiltersData.sortParam.equals("None")) {
-                        Arrays.sort(commodity);
-                    }
-                    String fullTextDisplay="";
-                    for(Commodity c: commodity){
-                        fullTextDisplay+=" <div >" +
-                                "  <strong><font color='grey'>State: "+c.state+"</font><font color='navy'> District: "+c.district+"</font><font color='red'> Variety: "+c.variety+"</font></strong><br/>" +
-                                "  <font color='purple'> Market: "+c.market+"</font><strong><font color='black' size='4sp'> Commodity: "+c.commodity+"</font></strong><br/>" +
-                                "  <font color='blue'> MinPrice: &#x20B9; "+Double.toString(c.min_price)+" </font><font color='blue'> MaxPrice: &#x20B9; "+Double.toString(c.max_price)+"</font>" +
-                                "  <font color='blue'> Modal: &#x20B9; "+Double.toString(c.modal_price)+"</font>" +
-                                "  <br/>" + "<font color='grey'>Arrival Date: "+c.arrival_date+"</font><br/>"+
-                                "  <span>...</span>" +
-                                "  </div>";
-                    }
-                    String tempDisplay=fullTextDisplay+"<div>End of results.</div>";
-                    final String displayText=tempDisplay;
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //String check[]=displayText.split("<div>");
-                            //Log.d("Ricky",check[check.length-1]);
-                            tv.setText(Html.fromHtml(displayText));
-                        }
-                    });
-
-                    //Log.d("Ricky",Integer.toString(records.size()));
-
-
-                }catch(Exception e){
-                   // Log.d("Ricky",e.toString());
                 }
-            }
-        });
-        thread.start();
+            });
+            thread.start();
+        }
     }
 
     @Override
     public void applyFilters() {
         filteredResult();
+    }
+
+    public static boolean checkInternet(Context context) {
+        NetworkInfo info = (NetworkInfo) ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if(info==null){
+            Toast.makeText(context,"No Internet Connection.",Toast.LENGTH_LONG).show();
+            b.setEnabled(false);
+            dialog.setEnabled(false);
+            tv.setText("Connect to Internet and Restart App");
+            return false;
+        }
+        return true;
     }
 }
 class Commodity implements Comparable<Commodity>{
